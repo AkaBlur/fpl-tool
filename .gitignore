@@ -1,2 +1,5 @@
 .vscode
 build
+build_win64
+*.m3u
+*.fpl
