@@ -14,6 +14,8 @@ namespace FPLTool
             // file read-in and .fpl magic check
             buf.reserve(READ_BUFF_SIZE);
 
+            // while reading the file, UTF-8 doesn't matter
+            // atleast if we don't apply some conversion inbetween (like constructing some UTF-8 string from const char*)
             char curChar;
             std::ifstream fileStream(m_fplPath);
 
@@ -83,13 +85,14 @@ namespace FPLTool
 
         }
 
+        // At this stage UTF-8 conversion will take over!
         // parsing for "file://" keyword
         for (auto& str : parsedContent)
         {
             if (str.length() >= 7 && str.substr(0, 7) == "file://")
             {
-                char* filePath = &str[7];
-                std::string strPath(filePath);
+                const char8_t* filePath = reinterpret_cast<const char8_t*>(&str[7]);
+                std::u8string strPath(filePath);
 
                 // as foobar2000 is only available on Windows
                 // there should be no issue replacing all backslashes
@@ -97,8 +100,7 @@ namespace FPLTool
                 std::replace(strPath.begin(), strPath.end(), '\\', '/');
 
                 // fpl file is encoded with UTF-8 chars
-                // TODO: change this when transitioning from c++-17
-                m_playlistFiles.emplace_back(std::filesystem::u8path(strPath));
+                m_playlistFiles.emplace_back(std::filesystem::path(strPath));
                 LOG_DEBUG("File added\n\t%s", m_playlistFiles.back().u8string().c_str());
 
             }
@@ -112,9 +114,29 @@ namespace FPLTool
         for (auto pathIt = m_playlistFiles.begin(); pathIt != m_playlistFiles.end(); pathIt++)
         {
             std::filesystem::path curPath((*pathIt));
-            std::string filePath(std::regex_replace(curPath.string(), deleteReg, appendStr));
+            //NOTE: regex and UTF-8
+            /*
+            * This is a workaround to get UTF-8 encoded characters in filenames working (which can be a thing, atleast in my libraries).
+            * First:
+            *       Converting the current path (u8String) to string, via reinterpret_cast
+            *       but conversion is from c-style const char8_t* to const char*.
+            *       Here no UTF-8 conversion is happening, compiler just changes the types.
+            * 
+            * Second:
+            *       Doing regex_replace on normal string path
+            * 
+            * Third:
+            *       First step in reverse and construct a new UTF-8 path (from u8String)
+            * 
+            * The only issue is, that there is no way regex is going to work with UTF-8 characters.
+            */
+            std::u8string u8Path(curPath.u8string());
+            std::string strPath(reinterpret_cast<const char*>(u8Path.c_str()));
+            
+            strPath = std::regex_replace(strPath, deleteReg, appendStr);
+            u8Path = std::u8string(reinterpret_cast<const char8_t*>(strPath.c_str()));
 
-            (*pathIt) = std::filesystem::path(filePath);
+            (*pathIt) = std::filesystem::path(u8Path);
 
         }
 
@@ -128,7 +150,7 @@ namespace FPLTool
         {
             if (!(std::filesystem::exists(filePath) && std::filesystem::is_regular_file(filePath)))
             {
-                // TODO: change when transitioning from c++-17 (or not? idk)
+                // printing char8_t works (but Windows console won't display it)
                 LOG_INFO("%s - File not found!", filePath.u8string().c_str());
 
             } else {
@@ -150,7 +172,8 @@ namespace FPLTool
     {
         for (auto& filePath : m_playlistFiles)
         {
-            LOG_OUTPUT("%s", filePath.string().c_str());
+            // printing char8_t works (but Windows console won't display it)
+            LOG_OUTPUT("%s", filePath.u8string().c_str());
 
         }
 

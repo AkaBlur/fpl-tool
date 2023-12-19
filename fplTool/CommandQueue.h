@@ -18,7 +18,7 @@ namespace FPLTool
     private:
         struct CommandSettings
         {
-            CommandSettings() : checkFileExistence(false), stringAppendFiles("") {};
+            CommandSettings() : checkFileExistence(false), stringAppendFiles(""), isRegex(false) {};
 
             // NECESSARY
             std::filesystem::path inputFile;

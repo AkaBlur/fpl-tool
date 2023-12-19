@@ -29,7 +29,7 @@ target_include_directories(
 target_compile_features(
     fplTool
     PUBLIC
-    cxx_std_17
+    cxx_std_20
 )
 
 target_compile_definitions(
