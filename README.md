@@ -5,19 +5,13 @@
 ## Features
 * Command-line tool
 * File input: **.fpl**
-* Parsing for playlist files (filepaths)
-* Checking for missing files
-* In-operation replacement in filepaths (manipulate paths from files)
+* Check for Missing Files with **-e**
+* In-operation Replacement in Filepaths (manipulate paths from files) with regex options **-r:a** & **-r:d**
+* Custom Output Options with **-o**
 
-### A word of warning!
-
-At the moment this implementation uses non-Windows path implementation.
-
-All paths will be seperated by <br>
-**forward slashes `/`** and **not backslashes `\`**.
-
-Typical output: <br>
-`Q:/Users/foo/Music/classic.mp3`
+This program is OS-aware when compiled. <br>
+Therefore the appropriate path separator will be used. <br>
+(`\` on Windows and `/` on UNIX-like systems)
 
 
 ## How-To-Use
@@ -75,6 +69,9 @@ fplTool -r:d <REGEX> -r:a <STRING>
 
 When supplying this option the regular expression `REGEX` is applied to all filepaths from the playlist. Portions that get matched **will be removed** from the path. <br>
 This option is intended to be used when changing all paths from all playlist files. <br>
+
+> [!IMPORTANT]
+> REGEX can only support basic **8-bit chars**! (nothing above U+00FF)
 
 **Example** <br>
 Remove drive letters from files
@@ -139,6 +136,19 @@ or if moved to a different disk:
 > Z:/music/3.mp3 <br>
 > Z:/music/4.mp3 <br>
 > Z:/music/5.mp3 <br>
+
+---
+<br>
+
+**Custom Output Options** - `-o <OPTION>`
+
+This option will produce an output that is formatted to a specific spec.
+
+**Currently implemented formats:**
+- M3U
+- EXTM3U (extended M3U)
+
+These options currently only output text-based playlists. They can be used to pipe the output to a file.
 
 ## Building
 
