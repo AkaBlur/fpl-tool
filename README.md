@@ -177,6 +177,18 @@ cmake -S . -B build -DBUILD_DEBUG=1
 cmake --build build
 ```
 
+## Installation
+
+Just invoke cmake with install but select the target **build directory**.
+
+> [!IMPORTANT]
+> This may require **sudo** or **system administrator** privileges!
+
+```bash
+# if build with: cmake -S . -B build
+cmake --install build
+```
+
 ## Development
 
 Currently I'm working on this project to give a reliable option from transitioning from foobar2000 to VLC (and to Linux as there is no native foobar2000 version 🙃). For this I tend to use this as an option to save me some hassle and rebuild my complete playlist from scratch. <br>

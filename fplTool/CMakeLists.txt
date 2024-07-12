@@ -61,3 +61,5 @@ if (WIN32)
         FPL_BUILD_PLATFORM="Windows"
     )
 endif()
+
+install(TARGETS fplTool DESTINATION bin)
